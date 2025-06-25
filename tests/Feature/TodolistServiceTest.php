@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Services\TodolistService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
+use Illuminate\Support\Facades\Session;
 use Tests\TestCase;
 
 class TodolistServiceTest extends TestCase
@@ -21,6 +22,42 @@ class TodolistServiceTest extends TestCase
     public function testTodolistNotNull()
     {
         self::assertNotNull($this->todolistService);
+    }
+
+    public function testSaveTodo()
+    {
+        $this->todolistService->saveTodo("1", "ratino");
+
+        $todoList = Session::get("todolist");
+        self::assertNotEmpty($todoList);
+        foreach ($todoList as $value){
+            self::assertEquals("1", $value['id']);
+            self::assertEquals("ratino", $value['todo']);
+        }
+    }
+
+    public function testGetTodoListEmpty()
+    {
+        self::assertEquals([], $this->todolistService->getTodoList());
+    }
+
+    public function testGetTodoListNotEmpty()
+    {
+        $expected = [
+            [
+                "id" => "1",
+                "todo" => "ratino"
+            ],
+            [
+                "id" => "2",
+                "todo" => "April" // Perhatikan kapitalisasi "April" vs "april" di bawah
+            ]
+        ];
+
+        $this->todolistService->saveTodo("1", "ratino");
+        $this->todolistService->saveTodo("2", "April");
+
+        self::assertEquals($expected, $this->todolistService->getTodoList());
     }
 
 
